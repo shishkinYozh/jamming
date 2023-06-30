@@ -33,11 +33,15 @@ const spotifySearch = async (token, tokenType, searchTrack, setTracks) => {
         if(response.ok) {
             const result = await response.json();
             const songArray = result.tracks.items.map(track => {
+                const trackName = track.name;
+                const trackArtistName = track.artists.map(artist => artist.name).join(" feat ");
+                const trackAlbumName = track.album.name;
+                const trackId = track.id
                 return {
-                    title: track.name,
-                    artist: track.artists[0].name,
-                    album: track.album.name,
-                    id: track.id
+                    title: trackName,
+                    artist: trackArtistName,
+                    album: trackAlbumName,
+                    id: trackId
                 }
             });
             setTracks(songArray);

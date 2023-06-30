@@ -7,7 +7,7 @@ function TrackList(props) {
         {tracks.map(({title, artist, album, id}) => {
             return (
                 <div key={id}>
-                    <Track title={title} artis={artist} album={album} />
+                    <Track title={title} artist={artist} album={album} />
                     <button id={id} onClick={handleTrack}> {deletable ? " - " : " + " } </button>
                 </div>
             )
