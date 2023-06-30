@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Playlist from "./components/Playlist/Playlist";
-import TrackList from "./components/TrackList/TrackList";
+import Search from "./components/Search/Search";
+import SearchResult from "./components/SearchResult/SearchResult";
 import styles from "./App.module.css";
 import {spotifyToken, spotifySearch} from "./utils/spotifyFetch";
 
@@ -64,8 +65,10 @@ function App() {
     */
 
     return (
+        <>
+        <Search />
         <div className={styles.container}>
-            <TrackList tracks={tracks} handleTrack={addTrack}/>
+            <SearchResult tracks={tracks} handleTrack={addTrack}/>
             <Playlist 
                 tracks={plTracks} 
                 handleTrack={delTrack} 
@@ -73,6 +76,7 @@ function App() {
                 setPlName={handlePlName} 
             />
         </div>
+        </>
     )
 }
 
