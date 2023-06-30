@@ -1,0 +1,41 @@
+* {
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.title {
+    font-size: 16px;
+    line-height: 25.6px;
+    font-weight: 400;
+}   
+
+.artist {
+    font-size: 14px;
+    line-height: 22.4px;
+    font-weight: 300;
+}
+
+.track {
+    height: 76px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    min-width: 300px;
+    max-width: 600px;
+    transition-property: background-color;
+    transition-duration: 1000ms;
+    transition-timing-function:ease-out;
+    display: grid;
+    align-items: center;
+}
+
+.track:hover {
+    background-color: aliceblue;
+    transition-property: background-color;
+    transition-duration: 50ms;
+    transition-timing-function:linear;
+}
+
+.track:hover .title {
+    font-weight: 550;
+}
