@@ -12,30 +12,7 @@ function App() {
     */
 
     const [plName, setPlName] = useState('');
-    const [tracks, setTracks] = useState(
-        [
-            {
-                title: "All The Thing She Said",
-                artist: "T.A.T.U",
-                id: "1"
-            },
-            {
-                title: "Tiny Dancer",
-                artist: "Elton John",
-                id: "2"
-            },
-            {
-                title: "Crazy",
-                artist: "Gnarls Barkley",
-                id: "3"
-            },
-            {
-                title: "Mrs Jackson",
-                artist: "Andre 3000",
-                id: "4"
-            }
-        ]
-    );
+    const [tracks, setTracks] = useState([]);
     const [plTracks, setPlTracks] = useState([]);
     const [token, setToken] = useState('');
     const [tokenType, setTokenType] = useState('')
@@ -77,7 +54,7 @@ function App() {
         }
         setTimeout(() => {
             spotifySearch(token,tokenType,'enya',setTracks)
-        },2000);
+        },0);
         
     },[]);
 
