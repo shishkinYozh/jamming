@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Playlist from "./components/Playlist/Playlist";
 import TrackList from "./components/TrackList/TrackList";
 import styles from "./App.module.css";
-import spotifyFetch from "./utils/spotifyFetch";
+import {spotifyToken, spotifySearch} from "./utils/spotifyFetch";
 
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
     */
 
     const [plName, setPlName] = useState('');
-    const tracks = 
+    const [tracks, setTracks] = useState(
         [
             {
                 title: "All The Thing She Said",
@@ -34,10 +34,12 @@ function App() {
                 artist: "Andre 3000",
                 id: "4"
             }
-        ];
+        ]
+    );
     const [plTracks, setPlTracks] = useState([]);
-    const [token, setToken] = useState();
-    const [tokenExpireTime, setTokenExpireTime] = useState(1688184999);
+    const [token, setToken] = useState('');
+    const [tokenType, setTokenType] = useState('')
+    const [tokenExpireTime, setTokenExpireTime] = useState(0);
 
 
     /*
@@ -68,10 +70,14 @@ function App() {
         return currentTime > tokenExpireTime ? true : false;
     };
 
+
     useEffect(() => {
         if(isTokenExpired()) {
-            spotifyFetch(setToken,setTokenExpireTime)
+            spotifyToken(setToken,setTokenExpireTime,setTokenType)
         }
+        setTimeout(() => {
+            spotifySearch(token,tokenType,'enya',setTracks)
+        },2000);
         
     },[]);
 
@@ -89,7 +95,6 @@ function App() {
                 plName={plName} 
                 setPlName={handlePlName} 
             />
-            <h4>{token}</h4>
         </div>
     )
 }
