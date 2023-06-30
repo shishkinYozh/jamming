@@ -1,9 +1,9 @@
-const Search = () => {
+const Search = ({searchValue, handleSearch, setValue}) => {
     return (
-        <form>
-            <input type="text" />
-            <input type="button" value="Search"></input>
-        </form>
+        <>
+            <input type="text" value={searchValue} onChange={setValue} />
+            <input type="button" value="Search" onClick={handleSearch}></input>
+        </>
     )
 }
 
