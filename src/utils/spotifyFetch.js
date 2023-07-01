@@ -1,54 +1,58 @@
 
-const spotifyToken = async (parseTokenRequest) => {
+const askToken = async (token, updateToken) => {
     const clientId = process.env.REACT_APP_SPOTIFY_ID;
     const clientSecret = process.env.REACT_APP_SPOTIFY_SECRET;
     const tokenUrl = "https://accounts.spotify.com/api/token";
     const grandType = "client_credentials";
     const bodyEndPoint = `grant_type=${grandType}&client_id=${clientId}&client_secret=${clientSecret}`;
-
-    try {
-        const response = await fetch(tokenUrl, {
-            method: 'POST',
-            headers: { 'Content-Type' : 'application/x-www-form-urlencoded' },
-            body: bodyEndPoint
-        });
-        if(response.ok) {
-            const jsonResponse = await response.json();
-            parseTokenRequest(jsonResponse);
+    const currentTime = Math.floor(Date.now()/1000);
+    const expireTime = token.expires_in ? token.expires_in : 0;
+    console.log(expireTime + " and " + currentTime)
+    if(expireTime < currentTime) {
+        try {
+            const response = await fetch(tokenUrl, {
+                method: 'POST',
+                headers: { 'Content-Type' : 'application/x-www-form-urlencoded' },
+                body: bodyEndPoint
+            })
+            if(response.ok) {
+                const jsonResponse = await response.json();
+                await updateToken(jsonResponse);
+                return jsonResponse
+            }
+        } catch(e) {
+            console.log(e)
         }
-    } catch(e) {
-        console.log(e)
+    } else {
+        return token
     }
 }
 
-const spotifySearch = async (token, tokenType, searchTrack, setTracks) => {
-    const url = `https://api.spotify.com/v1/search?q=${searchTrack}&type=track&limit=10`;
-    const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            Authorization : `${tokenType} ${token}`
-        },
-    })
-    try {
-        if(response.ok) {
-            const result = await response.json();
-            const songArray = result.tracks.items.map(track => {
-                const trackName = track.name;
-                const trackArtistName = track.artists.map(artist => artist.name).join(" feat ");
-                const trackAlbumName = track.album.name;
-                const trackId = track.id
-                return {
-                    title: trackName,
-                    artist: trackArtistName,
-                    album: trackAlbumName,
-                    id: trackId
-                }
+const spotifySearch = async (searchValue, parseSearchResponse, token, updateToken) => {
+    const url = `https://api.spotify.com/v1/search?q=${searchValue}&type=track&limit=10`;
+    askToken(token, updateToken)
+    .then(async(token) => {
+        try {
+            console.log(token.access_token)
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization : `${token.token_type} ${token.access_token}`
+                },
             });
-            setTracks(songArray);
-        }
-    } catch(e) {
-        console.log(e);
-    }
+            if(response.ok) {
+                const result = await response.json();
+                console.log(result);
+                parseSearchResponse(result);
+            }
+        } catch(e) {
+            console.log(e)
+        }      
+    })
 }
 
-export { spotifyToken, spotifySearch };
+const spotifySavePlaylist = () => {
+    
+}
+
+export { spotifySearch };

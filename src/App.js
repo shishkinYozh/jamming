@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Playlist from "./components/Playlist/Playlist";
 import Search from "./components/Search/Search";
 import SearchResult from "./components/SearchResult/SearchResult";
 import styles from "./App.module.css";
-import {spotifyToken, spotifySearch} from "./utils/spotifyFetch";
+import { spotifySearch } from "./utils/spotifyFetch";
 
 
 function App() {
@@ -12,13 +12,11 @@ function App() {
     such as playlist name, list of tracks, state for playlist tracks
     */
 
-    const [plName, setPlName] = useState('');
-    const [tracks, setTracks] = useState([]);
-    const [plTracks, setPlTracks] = useState([]);
-    const [token, setToken] = useState('');
-    const [tokenType, setTokenType] = useState('')
-    const [tokenExpireTime, setTokenExpireTime] = useState(0);
-    const [searchValue, setSearchValue] = useState('');
+    const [tracks, setTracks] = useState([]);                   // list of tracks in a results (setter is using in parseSearchResponse)
+    const [playlistTracks, setPlaylistTracks] = useState([]);   // list of tracks in a playlist (setter is using in delTrack and addTrack)
+    const [searchValue, setSearchValue] = useState('');         // search value (setter is using in handleSetSearchValue handler)
+    const [playlistName, setPlaylistName] = useState('');       // playlist name (setter is using in handlePlaylistName handler)
+    const [token, setToken] = useState({});                 // token object with .access_token, .token_type, .expires_in fields
 
 
     /*
@@ -26,70 +24,55 @@ function App() {
     such as adding tracks to the playlist, delete it from playlist
     */
 
-    // Playlist name handler
-    const handlePlName = (event) => {
-        setPlName(event.target.value);
+    // Parse resaponse from spotify and set song to the state
+    const parseSearchResponse = (songs) => {
+        const songArray = songs.tracks.items.map(track => {
+            return {
+                title: track.name,
+                artist: track.artists.map(artist => artist.name).join(" feat "),
+                album: track.album.name,
+                id: track.id
+            }
+        });
+        setTracks(songArray);
     };
-
-    // Delete track from playlist
-    const delTrack = (event) => {       
-        if(plTracks.every(track => track.id !== event.target.id)){
-            return
-        }
-        setPlTracks(prev => [...prev.filter(track => track.id !== event.target.id)]);
+    // Input Handlers
+    const handlePlaylistName = (event) => {
+        setPlaylistName(event.target.value);
     };
-
-    // Add track to playlist
-    const addTrack = (event) => {       
-        if(plTracks.some(track => track.id === event.target.id)){
-            return
-        }
-        setPlTracks(prev => [tracks.filter(track => track.id === event.target.id)[0], ...prev]);
-    };
-
-    // Parse requested token from spotify
-    const parseTokenRequest = (token) => {
-        const currentSecs = Math.floor(Date.now()/1000);
-        const response = token
-        setToken(token.access_token);
-        setTokenType(token.token_type);
-        setTokenExpireTime(currentSecs + token.expires_in);
-    };
-
-    // Search value handler
-    const handleSetSearchValue = (event) => {       
+    const handleSearchValue = (event) => {       
         setSearchValue(event.target.value);
+        return searchValue;
     };
-
-    // Check expiration date of token
-    const isTokenExpired = () => {      
-        const currentTime = Math.floor(Date.now()/1000);
-        return currentTime > tokenExpireTime ? true : false;
+    // Update token at spotify requests methods
+    const updateToken = (data) => {
+        
+        setToken({
+            access_token: data.access_token,
+            token_type: data.token_type,
+            expires_in: data.expires_in + Math.floor(Date.now()/1000)
+        })
     };
-
-    // Request for a token and track
-    const searchTrack = () => {       
-        if(isTokenExpired && !token) {
-            spotifyToken(parseTokenRequest);
+    // Methods for track to add/delete at playlist
+    const delTrack = (event) => {       
+        if(playlistTracks.every(track => track.id !== event.target.id)){
+            return
+        }
+        setPlaylistTracks(prev => [...prev.filter(track => track.id !== event.target.id)]);
+    };
+    const addTrack = (event) => {       
+        if(playlistTracks.some(track => track.id === event.target.id)){
+            return
+        }
+        setPlaylistTracks(prev => [tracks.filter(track => track.id === event.target.id)[0], ...prev]);
+    };
+    // Method to launch search
+    const searchTrack = () => {
+        if(searchValue) {
+            spotifySearch(searchValue, parseSearchResponse, token, updateToken);
         } else {
-            spotifySearch(token,tokenType,searchValue,setTracks)
         }
     };
-
-
-    /*
-    Hook for request for a song when token is updated.
-    ---------------- it's a wrong hook -----------------
-    - we shouldn't make request without request button -
-    ------- I'll sort out how to solve this later -------
-    */
-
-    useEffect(() => {
-        if(token) {
-            spotifySearch(token,tokenType,searchValue,setTracks)
-        }
-    },[token]);
-
 
 
     /*
@@ -98,15 +81,10 @@ function App() {
 
     return (
         <>
-        <Search handleSearch={searchTrack} searchValue={searchValue} setValue={handleSetSearchValue} />
+        <Search value={searchValue} setValue={handleSearchValue} searchTrack={searchTrack}  />
         <div className={styles.container}>
-            <SearchResult tracks={tracks} handleTrack={addTrack}/>
-            <Playlist 
-                tracks={plTracks} 
-                handleTrack={delTrack} 
-                plName={plName} 
-                setPlName={handlePlName} 
-            />
+            <SearchResult tracks={tracks} handleTrack={addTrack} />
+            <Playlist value={playlistName} setValue={handlePlaylistName} tracks={playlistTracks} handleTrack={delTrack} />
         </div>
         </>
     )

@@ -1,11 +1,11 @@
 import TrackList from "../TrackList/TrackList";
 
 function Playlist(props) {
-    const {tracks, handleTrack, plName, setPlName} = props;
+    const {tracks, handleTrack, value, setValue} = props;
 
     return (
         <div>
-            <input type="text" value={plName} onChange={setPlName}/>
+            <input type="text" value={value} onChange={setValue}/>
                 <TrackList tracks={tracks} handleTrack={handleTrack} deletable/>
             <button>Save Playlist</button>
         </div>
