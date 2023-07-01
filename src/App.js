@@ -33,7 +33,9 @@ function App() {
                 album: track.album.name,
                 id: track.id
             }
-        });
+        }).filter(track => {
+            return playlistTracks.every(plTrack => plTrack.id !== track.id);
+        })
         setTracks(songArray);
     };
     // Input Handlers

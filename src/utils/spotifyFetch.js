@@ -1,4 +1,4 @@
-
+// Inner method to request and update Token from spotify
 const askToken = async (token, updateToken) => {
     const clientId = process.env.REACT_APP_SPOTIFY_ID;
     const clientSecret = process.env.REACT_APP_SPOTIFY_SECRET;
@@ -7,7 +7,6 @@ const askToken = async (token, updateToken) => {
     const bodyEndPoint = `grant_type=${grandType}&client_id=${clientId}&client_secret=${clientSecret}`;
     const currentTime = Math.floor(Date.now()/1000);
     const expireTime = token.expires_in ? token.expires_in : 0;
-    console.log(expireTime + " and " + currentTime)
     if(expireTime < currentTime) {
         try {
             const response = await fetch(tokenUrl, {
@@ -29,11 +28,10 @@ const askToken = async (token, updateToken) => {
 }
 
 const spotifySearch = async (searchValue, parseSearchResponse, token, updateToken) => {
-    const url = `https://api.spotify.com/v1/search?q=${searchValue}&type=track&limit=10`;
+    const url = `https://api.spotify.com/v1/search?q=${searchValue}&type=track&limit=50`;
     askToken(token, updateToken)
     .then(async(token) => {
         try {
-            console.log(token.access_token)
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -42,7 +40,6 @@ const spotifySearch = async (searchValue, parseSearchResponse, token, updateToke
             });
             if(response.ok) {
                 const result = await response.json();
-                console.log(result);
                 parseSearchResponse(result);
             }
         } catch(e) {
@@ -51,8 +48,8 @@ const spotifySearch = async (searchValue, parseSearchResponse, token, updateToke
     })
 }
 
-const spotifySavePlaylist = () => {
-    
-}
+// const spotifySavePlaylist = () => {
+
+// }
 
 export { spotifySearch };
